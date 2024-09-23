@@ -30,12 +30,14 @@ CREATE TABLE `strat` (
     `text_out` longtext NOT NULL DEFAULT '',
     `json` longtext NOT NULL DEFAULT '',
 
+    `saved` int UNSIGNED NOT NULL DEFAULT 0,
+
     PRIMARY KEY (`id`),
     UNIQUE (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `strat_history` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id` bigint UNSIGNED NOT NULL DEFAULT 0,  # AUTO_INCREMENT
     `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
     `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -46,16 +48,20 @@ CREATE TABLE `strat_history` (
     `text_out` longtext NOT NULL DEFAULT '',
     `json` longtext NOT NULL DEFAULT '',
 
-    PRIMARY KEY (`id`)
+    `saved` int UNSIGNED NOT NULL DEFAULT 0,
+
+  # PRIMARY KEY (`id`),
+    INDEX (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `indiset` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `uuid` char(36) NOT NULL DEFAULT '',
+  # `uuid` char(36) NOT NULL DEFAULT '',
     `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
 
-    `str` varchar(250) NOT NULL DEFAULT '',
+    `str` longtext NOT NULL DEFAULT '',
+    `json` longtext NOT NULL DEFAULT '',
 
     PRIMARY KEY (`id`),
     UNIQUE (`str`)
@@ -63,20 +69,24 @@ CREATE TABLE `indiset` (
 
 CREATE TABLE `indiset_combo` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `uuid` char(36) NOT NULL DEFAULT '',
+  # `uuid` char(36) NOT NULL DEFAULT '',
     `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
+
+    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,    
+
+    `enable` int UNSIGNED NOT NULL DEFAULT 0,    
 
    #`indiset_id` int UNSIGNED NOT NULL DEFAULT 0,
    #`indiset_uuid` char(36) NOT NULL DEFAULT '',
 
-    `indiset_ids` longtext NOT NULL DEFAULT '',
-    `indiset_uuids` longtext NOT NULL DEFAULT '',
-    `enable` int UNSIGNED NOT NULL DEFAULT 0,
+    `indiset_ids` varchar(250) NOT NULL DEFAULT '',
+  # `indiset_uuids` longtext NOT NULL DEFAULT '',
 
     PRIMARY KEY (`id`),
     UNIQUE(`indiset_ids`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci AUTO_INCREMENT=11;
 
 CREATE TABLE `indiset_combo_by_users` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -87,23 +97,29 @@ CREATE TABLE `indiset_combo_by_users` (
     `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,
 
+    `enable` int UNSIGNED NOT NULL DEFAULT 0,
     `user_id` int UNSIGNED NOT NULL DEFAULT 0,
     `indiset_combo_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `indiset_combo_uuid` char(36) NOT NULL DEFAULT '',
-    `enable` int UNSIGNED NOT NULL DEFAULT 0,
-    `pairs` longtext NOT NULL DEFAULT '',
-    `takestop_combo_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `takestop_combo_uuid` char(36) NOT NULL DEFAULT '',
+  # `indiset_combo_uuid` char(36) NOT NULL DEFAULT '',
+    `pair` longtext NOT NULL DEFAULT '',
+
+  # `takestop_combo_id` int UNSIGNED NOT NULL DEFAULT 0,
+  # `takestop_combo_uuid` char(36) NOT NULL DEFAULT '',
+
+    `side` varchar(250) NOT NULL DEFAULT '',
+    `takestop_ids` longtext NOT NULL DEFAULT '',
+  # `takestop_uuids` longtext NOT NULL DEFAULT '',
 
     PRIMARY KEY (`id`),
-    UNIQUE(`user_id`,`indiset_combo_id`)
+    UNIQUE(`user_id`,`indiset_combo_id`),
+    INDEX(`enable`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 #CREATE TABLE `indiset_combo_history` ######################################################
 
 CREATE TABLE `takestop` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `uuid` char(36) NOT NULL DEFAULT '',
+  # `uuid` char(36) NOT NULL DEFAULT '',
     `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
 
@@ -114,14 +130,17 @@ CREATE TABLE `takestop` (
     UNIQUE (`take`,`stop`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `takestop_combo` (
+##CREATE TABLE `takestop_combo` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `uuid` char(36) NOT NULL DEFAULT '',
+  # `uuid` char(36) NOT NULL DEFAULT '',
     `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
     `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
 
-    `takestop_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `takestop_uuid` char(36) NOT NULL DEFAULT '',
+  # `takestop_id` int UNSIGNED NOT NULL DEFAULT 0,
+  # `takestop_uuid` char(36) NOT NULL DEFAULT '',
+
+    `takestop_ids` longtext NOT NULL DEFAULT '',
+  # `takestop_uuids` longtext NOT NULL DEFAULT '',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -139,135 +158,222 @@ echo '<input type="text" name="user_id" value="'.$user_id.'">';
 echo '<input type="submit">';
 echo '</form>';
 
-/*
-ТАБЛИЦА В БД:
-id
-dt_ins
-ts_ins
-dt_upd
-ts_upd
-str1
-str2
-str3
-str4
-*/
+
 
 
 
 require_once __DIR__.'/core.php';
-$tbl1 = 'strat';  // uniq(user_id) + textarea
-$tbl2 = '';  // textarea change log
-$tbl3 = 'indiset';  // indiset     // INDIcators SETtings
-$tbl4 = 'indiset_combo';  // setindiset  // SET of INDIcators SETtings  // indiset_combo   // combo_indiset
-$tbl5 = 'indiset_combo_by_users';  // takestop                                   // takestop_combo  // combo_takestop
-$tbl6 = '';
 
 
 
 
-/*
-$q = select from tbl1
-if($q){
-    insert into tbl2 set $q (log)
-}
-*/
 
 
+
+$db->query("INSERT INTO `strat_history` SELECT * FROM `strat` WHERE `user_id` = ?i LIMIT 1", $user_id);
 
 
 $d = [];
+$d['saved']   = 0;
 $d['user_id'] = $user_id;
 $d['text_in'] = $text;
-//$d['str2'] = prepare_text($text);  // trim() + удаляем парные пробелы + удаляем парные переносы строк + удаляем пробелы в пустых строках
 //save_to_tbl1($d);
-
 
 
 $r = parse_text($text);  // парсим синтаксис сигналов и в случае ошибок добавляем знаки вопроса в начало соответствующих строк
 //$d = [];
-$d['user_id'] = $user_id;
+//$d['user_id'] = $user_id;
 $d['text_out'] = $r['text'];
-$d['json'] = json_encode(array_values($r['signals']), JSON_PRETTY_PRINT);
-//$d['str4'] = $r['error_msg'];
-save_to_tbl1($d);
-//// в str4 наверное лучше запишем uuid пар, индикаторов и тэкстопов (в json?)
-//// перед этим в цикле пройти найти их в соответствующих таблицах
+$d['json'] = json_encode(array_values($r['signals']));  // JSON_PRETTY_PRINT
+//save_to_tbl1($d);
+db_insert_update('strat', $d);
 
 
 
 
 $indiset_combo_ids = [];
 foreach($r['signals'] as $v){
-    $ids = $uuids = [];
-    foreach($v['indisets'] as $vv){
-        save_to_tbl3($vv);
-        
-        $q = $db->getRow("SELECT * FROM ?n WHERE `str` = ?s LIMIT 1", $tbl3, $vv);
-        echo '<br>'.$q['id'];
+    $indiset_ids = [];
+  //$indiset_uuids = [];
+    foreach($v['indiset'] as $vv){
+      //save_to_tbl3($vv);  // indiset
+        db_insert_update('indiset', [  // заменил на ignore на update, чтобы фиксить indiset_parser() можно было
+      //db_insert_ignore('indiset', [
+                                        'str'  =>                $vv,
+                                        'json' => indiset_parser($vv),
+                                    ]);
 
-        $ids[$vv]   = $q['id'];
-        $uuids[$vv] = $q['uuid'];
+        $q = $db->getRow("SELECT * FROM `indiset` WHERE `str` = ?s LIMIT 1", $vv);
+      //echo '<br>'.$q['id'];
+
+        $indiset_ids[$vv]   = (int)$q['id'];
+      //$indiset_uuids[$vv] =      $q['uuid'];
+    }
+
+    $takestop_ids = [];
+  //$takestop_uuids = [];
+    foreach($v['takestop_decimal'] as $vv){
+        $ins = [];
+        $ins['take'] = $vv[0];
+        $ins['stop'] = $vv[1];
+        db_insert_ignore('takestop', $ins);
+
+        $q = $db->getRow("SELECT * FROM ?n WHERE `take` = ?s AND `stop` = ?s LIMIT 1", 'takestop', $ins['take'], $ins['stop']);
+        $takestop_ids  [implode('_', $ins)] = (int)$q['id'];
+      //$takestop_uuids[implode('_', $ins)] =      $q['uuid'];
+
     }
 
     if(!empty($v['is_valid'])){
-        $a = $b = [];
-        foreach($v['indisets'] as $vv){
-            $a[] = $ids[$vv];
-            $b[] = $uuids[$vv];
+        $a = [];
+      //$b = [];
+        foreach($v['indiset'] as $vv){
+            $a[] = $indiset_ids[$vv];
+          //$b[] = $indiset_uuids[$vv];
         }
-        sort($a); sort($b);  // по возрастанию значения, без сохранения ключей
+        sort($a);  // sort($b);  // по возрастанию значения, без сохранения ключей
         $ins = [];
       //$ins['indiset_ids']   = implode(',',$a);
       //$ins['indiset_uuids'] = implode(',',$b);
-        $ins['indiset_ids']   = json_encode($a, JSON_PRETTY_PRINT);
-        $ins['indiset_uuids'] = json_encode($b, JSON_PRETTY_PRINT);
+        $ins['indiset_ids']   = json_encode($a);  // JSON_PRETTY_PRINT
+      //$ins['indiset_uuids'] = json_encode($b);  // JSON_PRETTY_PRINT
         
-        save_to_tbl4($ins);  // indiset_combo
+      //save_to_tbl4($ins);  // indiset_combo
+        db_insert_ignore('indiset_combo', $ins);
 
-        $q = $db->getRow("SELECT * FROM ?n WHERE `indiset_ids` = ?s LIMIT 1", $tbl4, $ins['indiset_ids']);
+        $q = $db->getRow("SELECT * FROM `indiset_combo` WHERE `indiset_ids` = ?s LIMIT 1", $ins['indiset_ids']);
 
         $ins = [];
         $ins['user_id'] = $user_id;
         $ins['indiset_combo_id']   = $indiset_combo_ids[] = $q['id'];
-        $ins['indiset_combo_uuid']                        = $q['uuid'];
+      //$ins['indiset_combo_uuid']                        = $q['uuid'];
         
-        $ins['pairs'] = $v['pairs'];
+        $ins['pair'] = $v['pair'];
       //$ins['takestop_combo_id'] = 0;
-        $ins['takestop_combo_uuid'] = json_encode($v['takes_stops_combo']);  /////////////////////// наверное это надо прогнать через таблицы и положить сюда combo_id
+      //$ins['takestop_combo_uuid'] = json_encode($v['takestop']);  /////////////////////// наверное это надо прогнать через таблицы и положить сюда combo_id
+      //$ins['takestop_combo_uuid'] = json_encode($v['takestop_decimal']);
+        $a = [];
+      //$b = [];
+        foreach($v['takestop_decimal'] as $vv){
+            $a[] = $takestop_ids  [$vv[0].'_'.$vv[1]];
+          //$b[] = $takestop_uuids[$vv[0].'_'.$vv[1]];
+        }
+        sort($a);  // sort($b);  // по возрастанию значения, без сохранения ключей
+        $ins['side'] = $v['side'];
+        $ins['takestop_ids']   = json_encode($a);  // JSON_PRETTY_PRINT
+      //$ins['takestop_uuids'] = json_encode($b);  // JSON_PRETTY_PRINT
+
+      
+      
 
         $ins['enable'] = 1;
 
-        save_to_tbl5($ins);
+      //save_to_tbl5($ins);
+        db_insert_update('indiset_combo_by_users', $ins);
     }
 }
 
-$db->query("UPDATE ?n SET `enable` = 0 WHERE `user_id` = ?i AND `indiset_combo_id` NOT IN(?a)", $tbl5, $user_id, $indiset_combo_ids);
-//$db->query("UPDATE ?n SET `enable` = 1 WHERE `user_id` = ?i AND `indiset_combo_id`     IN(?a)", $tbl5, $user_id, $indiset_combo_ids);
-//$q = $db->getAll("SELECT * FROM ?n WHERE `user_id` = ?i", $tbl5, $user_id);
+$db->query("UPDATE `indiset_combo_by_users` SET `enable` = 0 WHERE `user_id` = ?i AND `indiset_combo_id` NOT IN(?a)", $user_id, $indiset_combo_ids);
+//$db->query("UPDATE `indiset_combo_by_users` SET `enable` = 1 WHERE `user_id` = ?i AND `indiset_combo_id`     IN(?a)", $user_id, $indiset_combo_ids);
+//$q = $db->getAll("SELECT * FROM `indiset_combo_by_users` WHERE `user_id` = ?i", $user_id);
 
 
-echo '<pre>'; print_r($r); echo '</pre>';
-
-//return json_encode($r)
-//insert/update into tbl
-//insert into tbl_log
-
-
+$q0 = $db->getCol("SELECT `indiset_combo_id` FROM `indiset_combo_by_users` WHERE `enable` = 0");
+$q1 = $db->getCol("SELECT `indiset_combo_id` FROM `indiset_combo_by_users` WHERE `enable` = 1");
+if(!empty($q0)) $db->query("UPDATE `indiset_combo` SET `enable` = 0 WHERE `id` IN(?a)", array_diff($q0, $q1));
+if(!empty($q1)) $db->query("UPDATE `indiset_combo` SET `enable` = 1 WHERE `id` IN(?a)", $q1);
 
 
 
 
+$result = $r;
 
-function prepare_text($text){
-    // trim() + удаляем парные пробелы + удаляем парные переносы строк + удаляем пробелы в пустых строках
+
+
+
+$qq = $db->getAll("SELECT * FROM `indiset_combo` WHERE 1");
+foreach($qq as $vv){
     
-    //$text = str_replace(' ', '', $text);
-    //$text = trim($text);
-    //$a = explode("\n", $text);
-    //$a = array_map('trim', $a);
-    //$text = implode("\n", $a);
+    $tmp = json_decode($vv['indiset_ids'], 1);
+    if(empty($tmp)) continue;  // ERROR
+    $q = $db->getCol("SELECT `str` FROM `indiset` WHERE `id` IN(?a)", $tmp);
+    ////////////////////////////////////////////////////////////////////////////////// здесь нужна сортировка по timeframe desc
+    $indicator = implode("\n", $q);
+    
+    $takestop = '';
+    $q = $db->getAll("SELECT * FROM `indiset_combo_by_users` WHERE `enable` = 1 AND `indiset_combo_id` = ?i", $vv['id']);
+    $r = [];
+    foreach($q as $v){
+        $tmp = json_decode($v['takestop_ids'], 1);
+        if(!empty($tmp)) $r = array_merge($r, $tmp);
+    }
+    $r = array_unique($r);
+    if(!empty($r)){
+        $q = $db->getAll("SELECT * FROM `takestop` WHERE `id` IN(?a)", $r);
+        $res = [];
+        foreach($q as $v){
+            $res[] = [$v['take'], $v['stop']];
+        }
+        $takestop = json_encode($res);
+    }
 
-    return $text;
+    
+    $ins = [];
+    $ins['id'] = $vv['id'];
+  //$ins['parent_id'] = 0;
+    $ins['pair'] = '*';
+  //$ins['timeframe'] = '';
+  //$ins['price'] = '';
+    $ins['indicator'] = $indicator;
+  //$ins['condition'] = '';
+    $ins['enable'] = $vv['enable'];
+    $ins['dt_ins'] = $vv['dt_ins'];
+    $ins['positionSide'] = $takestop;
+    $db->query("INSERT INTO `z_0_signal` SET ?u ON DUPLICATE KEY UPDATE ?u", $ins, $ins);
+}
+
+
+
+
+$db->query("UPDATE `strat` SET `saved` = 1 WHERE `user_id` = ?i LIMIT 1", $user_id);
+
+
+echo '<pre>'; print_r($result); echo '</pre>';
+
+
+
+
+
+
+
+
+
+
+
+
+
+function takestop_parser($a = [], $side = 'long'){  // $a = json_decode('[[1.02,1.01],[1.03,1.04]]', 1);
+    $r = [];
+    foreach($a as $k=>$v){
+        foreach($v as $kk=>$vv){
+            if(substr($vv, -1) == '%'){
+                $vv = substr($vv, 0, -1) * 0.01;
+
+                if($kk == 0){  // take
+                    if(    $side == 'long')  $vv = 1+$vv;
+                    elseif($side == 'short') $vv = 1-$vv;
+                }
+                if($kk == 1){  // stop
+                    if(    $side == 'long')  $vv = 1-$vv;
+                    elseif($side == 'short') $vv = 1+$vv;
+                }
+            }
+
+            $r[$k][$kk] = $vv;
+        }
+    }
+
+    return $r;
 }
 
 
@@ -277,12 +383,14 @@ function is_takestop($str){  // валидатор строки такого в�
     return false;
 }
 
+
 function is_indiset($str){
     if(strpos($str, '<') !== false || strpos($str, '>') !== false) return true;
     return false;
 }
 
-function is_pairs($str){
+
+function is_pair($str){  // is_pairs
     if($str == '*') return true;  //// реализовать валидацию: *, через запятую, *usdt
 
     $r = true;
@@ -293,6 +401,7 @@ function is_pairs($str){
 
     return $r;
 }
+
 
 function parse_text($text){
     $r = [];
@@ -321,30 +430,35 @@ function parse_text($text){
         if(empty($r['signals'][$i])){  // зададим порядок элементов в массиве
             $r['signals'][$i] = [
                                     'is_valid'          => true,
-                                    'pairs'             => '',
-                                    'indisets'          => [],
-                                    'takes_stops_combo' => [],
+                                    'pair'              => '',
+                                    'indiset'           => [],
+                                    'takestop_original' => [],
+                                    'takestop_decimal'  => [],
                                     'side'              => 'long',
                                     'stock'             => 'sandbox',  // sandbox_binance_spot
                                 ];
         }
 
 
-        $is_p  = is_pairs($v);
+        $is_p  = is_pair($v);
         $is_i  = is_indiset($v);
         $is_ts = is_takestop($v);
 
         
-        if(    in_array($v, ['short','long']))           $r['signals'][$i]['side']              =             $v;
-        elseif(in_array($v, ['sandbox','binance_spot'])) $r['signals'][$i]['stock']             =             $v;
-        elseif( $is_p && !$is_i && !$is_ts)              $r['signals'][$i]['pairs']             = str_replace(['_','-','/'], '', $v);      // if($n == 1)  //////////////////////////// здесь нужна либо регулярка только цифры и англ.буквы или список монет в функцию
-        elseif(!$is_p && !$is_i &&  $is_ts)              $r['signals'][$i]['takes_stops_combo'] = json_decode($v, 1);                      // if(empty($a[$k+1])
-        elseif(!$is_p &&  $is_i && !$is_ts)              $r['signals'][$i]['indisets'][]        =             $v;
+        if(    in_array($v, ['short','long']))           $r['signals'][$i]['side']  = $v;
+        elseif(in_array($v, ['sandbox','binance_spot'])) $r['signals'][$i]['stock'] = $v;
+        elseif( $is_p && !$is_i && !$is_ts)              $r['signals'][$i]['pair']  = str_replace(['_','-','/'], '', $v);  // if($n == 1)  //////////////////////////// здесь нужна либо регулярка только цифры и англ.буквы или список монет в функцию
+        elseif(!$is_p && !$is_i &&  $is_ts)              $r['signals'][$i]['takestop_original'] = json_decode($v, 1);      // if(empty($a[$k+1])
+        elseif(!$is_p &&  $is_i && !$is_ts)              $r['signals'][$i]['indiset'][] = $v;
         else {
             $orig[$k] = '?????????? '.$orig[$k];
             $r['signals'][$i]['is_valid'] = false;
         }
     
+
+        $takestop_original = $r['signals'][$i]['takestop_original'];
+        $side              = $r['signals'][$i]['side'];
+        if(!empty($takestop_original)) $r['signals'][$i]['takestop_decimal'] = takestop_parser($takestop_original, $side);
 
     }
 
@@ -352,55 +466,18 @@ function parse_text($text){
 
     
     foreach($r['signals'] as $i=>$v){
-        if(empty($r['signals'][$i]['indisets'])) $r['signals'][$i]['is_valid'] = false;
+        if(empty($r['signals'][$i]['indiset'])) $r['signals'][$i]['is_valid'] = false;
     }
 
 
     return $r;
-
-
-    /*
-    $a = explode("\n\n", $text);
-
-    $r = [];
-    foreach($a as $v){
-        $aa = explode("\n", $v);
-        $pairs = array_shift($aa);
-        
-        // надо как-то провалидировать что нижняя строка вот такого вида: [[1.02,1.01],[1.03,1.04]]
-        $takestops = [];
-        $tmp = $aa;
-        $tmp1 = array_pop($tmp);
-        $tmp1 = json_decode($tmp1, 1);
-        if(!empty($tmp1)){
-            $takestops = $tmp1;
-            $aa = $tmp;
-        }
-
-        $indisets = [];  // INDIcators SETs
-        foreach($aa as $v){
-            $indisets = $v;
-        }
-        
-        $r[] = [];  ////
-    }
-    */
-
-    /*
-    $r['text'] = '';
-  //$r['error_msg'] = '';
-    $r['signal']['pairs'] = '';
-    $r['signal']['indicators'] = [];
-    $r['signal']['takestops']  = [];
-    return $r;
-    */
 }
 
 
 
 
-
-function save_to_tbl1($d){
+/*
+function save_to_tbl1($d){  // strat
     global $tbl1;
     global $db;
 
@@ -415,15 +492,16 @@ function save_to_tbl1($d){
     $upd['dt_upd'] = date('Y-m-d H:i:s', $ts);
 
     $db->query("INSERT INTO ?n SET ?u ON DUPLICATE KEY UPDATE ?u", $tbl1, $ins, $upd);  //////////////////////// uniq(user_id)
-/*
-    echo '<br>';
-    echo '<br>ins='.$db->insertId();
-    echo '<br>upd='.$db->affectedRows();
-    echo '<br>';
-*/
-}
 
-function save_to_tbl3($d){
+    //echo '<br>';
+    //echo '<br>ins='.$db->insertId();
+    //echo '<br>upd='.$db->affectedRows();
+    //echo '<br>';
+}
+*/
+
+/*
+function save_to_tbl3($d){  // indiset
     global $tbl3;
     global $db;
 
@@ -438,15 +516,16 @@ function save_to_tbl3($d){
     $ins['dt_ins'] = date('Y-m-d H:i:s', $ts);
 
     $db->query("INSERT IGNORE INTO ?n SET ?u", $tbl3, $ins);
-/*
-    echo '<br>';
-    echo '<br>ins='.$db->insertId();
-    echo '<br>upd='.$db->affectedRows();
-    echo '<br>';
-*/
-}
 
-function save_to_tbl4($ins){
+    //echo '<br>';
+    //echo '<br>ins='.$db->insertId();
+    //echo '<br>upd='.$db->affectedRows();
+    //echo '<br>';
+}
+*/
+
+/*
+function save_to_tbl4($ins){  // indiset_combo
     global $tbl4;
     global $db;
 
@@ -461,8 +540,10 @@ function save_to_tbl4($ins){
 
     $db->query("INSERT IGNORE INTO ?n SET ?u", $tbl4, $ins);
 }
+*/
 
-function save_to_tbl5($ins){
+/*
+function save_to_tbl5($ins){  // indiset_combo_by_users
     global $tbl5;
     global $db;
 
@@ -481,17 +562,70 @@ function save_to_tbl5($ins){
   //$db->query("INSERT IGNORE INTO ?n SET ?u", $tbl5, $ins);
     $db->query("INSERT INTO ?n SET ?u ON DUPLICATE KEY UPDATE ?u", $tbl5, $ins, $upd);
 }
+*/
 
+function db_insert_ignore($tbl, $ins = []){
+    global $db;
 
+  //if(in_array($tbl, ['indiset','indiset_combo','takestop'])) $ins['uuid'] = guidv4();
 
-function db_insert($tbl, $data = []){
+    $ts = time();
+    $ins['ts_ins'] = $ts;
+    $ins['dt_ins'] = date('Y-m-d H:i:s', $ts);
 
+    db_autoincrement($tbl);
+    $db->query("INSERT IGNORE INTO ?n SET ?u", $tbl, $ins);
 }
 
-function db_insert_update($tbl, $data = []){
+function db_insert_update($tbl, $ins = []){
+    global $db;
+
+    $upd = $ins;
     
+  //if(in_array($tbl, ['indiset','indiset_combo','takestop'])) $ins['uuid'] = guidv4();
+
+    $ts = time();
+    $ins['ts_ins'] = $ts;
+    $ins['dt_ins'] = date('Y-m-d H:i:s', $ts);
+    $upd['ts_upd'] = $ts;
+    $upd['dt_upd'] = date('Y-m-d H:i:s', $ts);
+
+    db_autoincrement($tbl);
+    $db->query("INSERT INTO ?n SET ?u ON DUPLICATE KEY UPDATE ?u", $tbl, $ins, $upd);
+}
+
+function db_autoincrement($tbl){
+    global $db;
+    try {
+        $max_id = $db->getOne("SELECT MAX(`id`) FROM ?n", $tbl);
+        if(!empty($max_id)) $db->query("ALTER TABLE ?n AUTO_INCREMENT = ?i", $tbl, ($max_id+1));
+    }
+    catch (Exception $e){
+
+    }
 }
 
 function db_select($tbl, $data = []){
     
+}
+
+
+
+
+function indiset_parser($str){  // $str = 'bbands(5m,15)[1] > close';
+  //$str = str_replace(' ', '', $str);  // закоментировал, потому что в функцию уже без пробелов строку передаем
+
+    $regex = '/(\w+)\((.+)\)\[(\d+)\]([<>]=?)(.+)/';
+
+    if(!preg_match($regex, $str, $match)) return '{"ok":false}';
+
+    $result = [
+      'function'  => $match[1],
+      'params'    => explode(',', $match[2]),
+      'num'       => $match[3],
+      'sign'      => $match[4],
+      'condition' => $match[5]
+    ];
+    
+    return json_encode($result);
 }

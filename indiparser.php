@@ -154,7 +154,7 @@ CREATE TABLE `takestop` (
 ";
 
 
-if(isset($_GET['migrate'])){
+if(isset($_GET['migrate']) || @$argv[1] == 'migrate'){
     $db->query($query_create);
     exit('done!');
 }

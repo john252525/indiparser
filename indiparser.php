@@ -1,5 +1,12 @@
 <?php
+
 ini_set('display_errors', 1);
+
+require_once __DIR__.'/core.php';
+
+
+
+
 
 
 
@@ -147,6 +154,17 @@ CREATE TABLE `takestop` (
 ";
 
 
+if(isset($_GET['migrate'])){
+    $db->query($query_create);
+    exit('done!');
+}
+
+
+
+
+
+
+
 
 $user_id =    (int)@$_REQUEST['user_id'];
 $text    = (string)@$_REQUEST['text'];
@@ -158,11 +176,6 @@ echo '<input type="text" name="user_id" value="'.$user_id.'">';
 echo '<input type="submit">';
 echo '</form>';
 
-
-
-
-
-require_once __DIR__.'/core.php';
 
 
 
@@ -197,7 +210,7 @@ foreach($r['signals'] as $v){
   //$indiset_uuids = [];
     foreach($v['indiset'] as $vv){
       //save_to_tbl3($vv);  // indiset
-        db_insert_update('indiset', [  // заменил на ignore на update, чтобы фиксить indiset_parser() можно было
+        db_insert_update('indiset', [  // заменил ignore на update, чтобы фиксить indiset_parser() можно было
       //db_insert_ignore('indiset', [
                                         'str'  =>                $vv,
                                         'json' => indiset_parser($vv),
@@ -615,17 +628,29 @@ function db_select($tbl, $data = []){
 function indiset_parser($str){  // $str = 'bbands(5m,15)[1] > close';
   //$str = str_replace(' ', '', $str);  // закоментировал, потому что в функцию уже без пробелов строку передаем
 
-    $regex = '/(\w+)\((.+)\)\[(\d+)\]([<>]=?)(.+)/';
+    
+    $regex = '/(\w+)\((.+)\)(\[(\d+)\])?([<>]=?)(.+)/';
 
     if(!preg_match($regex, $str, $match)) return '{"ok":false}';
 
+    /*
+    $regex = '/(\w+)\((.+)\)\[(\d+)\]([<>]=?)(.+)/';
     $result = [
-      'function'  => $match[1],
-      'params'    => explode(',', $match[2]),
-      'num'       => $match[3],
-      'sign'      => $match[4],
-      'condition' => $match[5]
+        'function'  => $match[1],
+        'params'    => explode(',', $match[2]),
+        'num'       => $match[3],
+        'sign'      => $match[4],
+        'condition' => $match[5]
     ];
+    */
     
+    $result = [
+        'function'  => $match[1],
+        'params'    => explode(',', $match[2]),
+        'num'       => empty($match[4]) ? '-1' : $match[4] ,
+        'sign'      => $match[5],
+        'condition' => $match[6]
+    ];
+
     return json_encode($result);
 }

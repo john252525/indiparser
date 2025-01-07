@@ -25,6 +25,21 @@ CREATE TABLE `example` (
 ";
 
 $query_create = "
+
+CREATE TABLE `z_0_signal` (
+    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+    `parent_id` int UNSIGNED NOT NULL DEFAULT 0,
+    `pair` varchar(250) NOT NULL DEFAULT '',
+    `timeframe` varchar(250) NOT NULL DEFAULT '',
+    `price` varchar(250) NOT NULL DEFAULT '',
+    `indicator` varchar(250) NOT NULL DEFAULT '',
+    `condition` varchar(250) NOT NULL DEFAULT '',
+    `enable` int UNSIGNED NOT NULL DEFAULT 0,
+    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    `positionSide` varchar(250) NOT NULL DEFAULT '',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE `strat` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
     `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -69,6 +84,9 @@ CREATE TABLE `indiset` (
 
     `str` longtext NOT NULL DEFAULT '',
     `json` longtext NOT NULL DEFAULT '',
+
+    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`),
     UNIQUE (`str`)
@@ -136,7 +154,9 @@ CREATE TABLE `takestop` (
     PRIMARY KEY (`id`),
     UNIQUE (`take`,`stop`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+";
 
+/*
 ##CREATE TABLE `takestop_combo` (
     `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   # `uuid` char(36) NOT NULL DEFAULT '',
@@ -151,8 +171,7 @@ CREATE TABLE `takestop` (
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-";
-
+*/
 
 if(isset($_GET['migrate']) || @$argv[1] == 'migrate'){
     $db->query($query_create);
@@ -169,12 +188,44 @@ if(isset($_GET['migrate']) || @$argv[1] == 'migrate'){
 $user_id =    (int)@$_REQUEST['user_id'];
 $text    = (string)@$_REQUEST['text'];
 
+if(isset($_GET['html'])){
+    echo '<form>';
+    echo '<input type="hidden" name="html">';
+    echo '<textarea autofocus rows="22" cols="55" name="text">'.$text.'</textarea>';
+    echo '<input type="text" name="user_id" value="'.$user_id.'">';
+    echo '<input type="submit">';
+    echo '</form>';
+}
+else {
+    if(empty($user_id)) exit('error user_id');
+    if(empty($text)) $text = $db->getOne("SELECT `text_in` FROM `strat` WHERE `user_id` = ?i LIMIT 1", $user_id);
 
-echo '<form>';
-echo '<textarea autofocus rows="22" cols="55" name="text">'.$text.'</textarea>';
-echo '<input type="text" name="user_id" value="'.$user_id.'">';
-echo '<input type="submit">';
-echo '</form>';
+
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header("Access-Control-Allow-Headers: *");
+    echo '{
+              "title":"Настройки индикаторов",
+              "label":"Настройки индикаторов",
+              "submit":{"label":"Отправить","variant":"elevated","disabled":false},
+              "components":[
+                  {
+                      "label":"Настройки индикаторов",
+                      "type":"textarea",
+                      "value":"'.$text.'",
+                      "rows":"4",
+                      "name":"text",
+                      "required":true,
+                      "error":"",
+                      "cols":{"cols":12,"md":6}
+                  }
+              ]
+          }';
+    
+    
+    $json = file_get_contents('php://input');
+    if(empty($json) && !$_POST) exit();
+}
 
 
 

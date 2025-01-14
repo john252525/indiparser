@@ -43,7 +43,7 @@ else {
     header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
     header("Access-Control-Allow-Headers: *");
-    echo '{
+    $tmp = '{
               "title":"Настройки индикаторов",
               "label":"Настройки индикаторов",
               "submit":{"label":"Отправить","variant":"elevated","disabled":false},
@@ -51,7 +51,7 @@ else {
                   {
                       "label":"Настройки индикаторов",
                       "type":"textarea",
-                      "value":"'.$text.'",
+                      "value":"",
                       "rows":"4",
                       "name":"text",
                       "required":true,
@@ -61,11 +61,15 @@ else {
 		
 		  {
 		      "type": "post",
-        	      "text": "' . $responseText . '"
+        	      "text": ""
         		
     		  }
               ]
           }';
+    $a = json_decode($tmp, 1);
+    $a['components'][0]['value'] = $text;
+    $a['components'][1]['text'] = $responseText;
+    echo json_encode($a);
     
     
     $json = file_get_contents('php://input');

@@ -4,175 +4,10 @@ ini_set('display_errors', 1);
 
 require_once __DIR__.'/core.php';
 
+$queries = require_once __DIR__. '/create_tables.php';
 
 
-
-
-
-
-
-$query_create = "
-CREATE TABLE `example` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-    `text` longtext NOT NULL DEFAULT '',
-    `pair` varchar(250) NOT NULL DEFAULT '',
-    PRIMARY KEY (`id`),
-    UNIQUE (`pair`),
-    INDEX (`text`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-";
-
-$query_create = "
-
-CREATE TABLE `z_0_signal` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `parent_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `pair` varchar(250) NOT NULL DEFAULT '',
-    `timeframe` varchar(250) NOT NULL DEFAULT '',
-    `price` varchar(250) NOT NULL DEFAULT '',
-    `indicator` varchar(250) NOT NULL DEFAULT '',
-    `condition` varchar(250) NOT NULL DEFAULT '',
-    `enable` int UNSIGNED NOT NULL DEFAULT 0,
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `positionSide` varchar(250) NOT NULL DEFAULT '',
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `strat` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `user_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `text_in` longtext NOT NULL DEFAULT '',
-    `text_out` longtext NOT NULL DEFAULT '',
-    `json` longtext NOT NULL DEFAULT '',
-
-    `saved` int UNSIGNED NOT NULL DEFAULT 0,
-
-    PRIMARY KEY (`id`),
-    UNIQUE (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `strat_history` (
-    `id` bigint UNSIGNED NOT NULL DEFAULT 0,  # AUTO_INCREMENT
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `user_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `text_in` longtext NOT NULL DEFAULT '',
-    `text_out` longtext NOT NULL DEFAULT '',
-    `json` longtext NOT NULL DEFAULT '',
-
-    `saved` int UNSIGNED NOT NULL DEFAULT 0,
-
-  # PRIMARY KEY (`id`),
-    INDEX (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `indiset` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  # `uuid` char(36) NOT NULL DEFAULT '',
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `str` longtext NOT NULL DEFAULT '',
-    `json` longtext NOT NULL DEFAULT '',
-
-    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,
-
-    PRIMARY KEY (`id`),
-    UNIQUE (`str`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `indiset_combo` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  # `uuid` char(36) NOT NULL DEFAULT '',
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,    
-
-    `enable` int UNSIGNED NOT NULL DEFAULT 0,    
-
-   #`indiset_id` int UNSIGNED NOT NULL DEFAULT 0,
-   #`indiset_uuid` char(36) NOT NULL DEFAULT '',
-
-    `indiset_ids` varchar(250) NOT NULL DEFAULT '',
-  # `indiset_uuids` longtext NOT NULL DEFAULT '',
-
-    PRIMARY KEY (`id`),
-    UNIQUE(`indiset_ids`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci AUTO_INCREMENT=11;
-
-CREATE TABLE `indiset_combo_by_users` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  # `uuid` char(36) NOT NULL DEFAULT '',
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `dt_upd` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_upd` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `enable` int UNSIGNED NOT NULL DEFAULT 0,
-    `user_id` int UNSIGNED NOT NULL DEFAULT 0,
-    `indiset_combo_id` int UNSIGNED NOT NULL DEFAULT 0,
-  # `indiset_combo_uuid` char(36) NOT NULL DEFAULT '',
-    `pair` longtext NOT NULL DEFAULT '',
-
-  # `takestop_combo_id` int UNSIGNED NOT NULL DEFAULT 0,
-  # `takestop_combo_uuid` char(36) NOT NULL DEFAULT '',
-
-    `side` varchar(250) NOT NULL DEFAULT '',
-    `takestop_ids` longtext NOT NULL DEFAULT '',
-  # `takestop_uuids` longtext NOT NULL DEFAULT '',
-
-    PRIMARY KEY (`id`),
-    UNIQUE(`user_id`,`indiset_combo_id`),
-    INDEX(`enable`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-#CREATE TABLE `indiset_combo_history` ######################################################
-
-CREATE TABLE `takestop` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  # `uuid` char(36) NOT NULL DEFAULT '',
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-
-    `take` varchar(250) NOT NULL DEFAULT '',
-    `stop` varchar(250) NOT NULL DEFAULT '',
-
-    PRIMARY KEY (`id`),
-    UNIQUE (`take`,`stop`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-";
-
-/*
-##CREATE TABLE `takestop_combo` (
-    `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  # `uuid` char(36) NOT NULL DEFAULT '',
-    `dt_ins` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-    `ts_ins` int UNSIGNED NOT NULL DEFAULT 0,
-
-  # `takestop_id` int UNSIGNED NOT NULL DEFAULT 0,
-  # `takestop_uuid` char(36) NOT NULL DEFAULT '',
-
-    `takestop_ids` longtext NOT NULL DEFAULT '',
-  # `takestop_uuids` longtext NOT NULL DEFAULT '',
-
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-*/
-
+//Создаем таблицы базы данных
 if(isset($_GET['migrate']) || @$argv[1] == 'migrate'){
     $db->query($query_create);
     exit('done!');
@@ -180,13 +15,14 @@ if(isset($_GET['migrate']) || @$argv[1] == 'migrate'){
 
 
 
-
-
-
+$json = file_get_contents('php://input');
+//if(empty($json) && !$_POST) exit();
+$arr = json_decode($json, 1);
+$text = @trim($arr['text']);
 
 
 $user_id =    (int)@$_REQUEST['user_id'];
-$text    = (string)@$_REQUEST['text'];
+//$text    = (string)@$_REQUEST['text'];
 
 if(isset($_GET['html'])){
     echo '<form>';
@@ -197,9 +33,12 @@ if(isset($_GET['html'])){
     echo '</form>';
 }
 else {
+    $responseText = "Данные успешно сохранены на сервере";
     if(empty($user_id)) exit('error user_id');
-    if(empty($text)) $text = $db->getOne("SELECT `text_in` FROM `strat` WHERE `user_id` = ?i LIMIT 1", $user_id);
-
+    if(empty($text)) {
+	$responseText = "Данные получены с сервера";
+	$text = $db->getOne("SELECT `text_in` FROM `strat` WHERE `user_id` = ?i LIMIT 1", $user_id);
+    }
 
     header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
@@ -218,7 +57,13 @@ else {
                       "required":true,
                       "error":"",
                       "cols":{"cols":12,"md":6}
-                  }
+                  },
+		
+		  {
+		      "type": "post",
+        	      "text": "' . $responseText . '"
+        		
+    		  }
               ]
           }';
     
@@ -226,11 +71,6 @@ else {
     $json = file_get_contents('php://input');
     if(empty($json) && !$_POST) exit();
 }
-
-
-
-
-
 
 
 
@@ -402,7 +242,7 @@ foreach($qq as $vv){
 $db->query("UPDATE `strat` SET `saved` = 1 WHERE `user_id` = ?i LIMIT 1", $user_id);
 
 
-echo '<pre>'; print_r($result); echo '</pre>';
+//echo '<pre>'; print_r($result); echo '</pre>';
 
 
 

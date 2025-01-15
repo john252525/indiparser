@@ -1,5 +1,10 @@
 <?php
 
+
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: *");
+header('Content-Type: application/json');
+
 ini_set('display_errors', 1);
 
 require_once __DIR__.'/core.php';
@@ -12,6 +17,22 @@ if(isset($_GET['migrate']) || @$argv[1] == 'migrate'){
     $db->query($query_create);
     exit('done!');
 }
+
+$token = 'i';
+
+if (!isset($_GET['token'])) {
+    http_response_code(400);
+    exit('Error: No token passed.');
+}
+
+
+$incoming_token = $_GET['token'];
+
+if ($incoming_token !== $token) {
+    http_response_code(403);
+    exit('Wrong token: ' . htmlspecialchars($incoming_token));
+}
+
 
 
 
@@ -40,9 +61,7 @@ else {
 	$text = $db->getOne("SELECT `text_in` FROM `strat` WHERE `user_id` = ?i LIMIT 1", $user_id);
     }
 
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
-    header("Access-Control-Allow-Headers: *");
+    
     $tmp = '{
               "title":"Настройки индикаторов",
               "label":"Настройки индикаторов",
@@ -69,7 +88,7 @@ else {
     $a = json_decode($tmp, 1);
     $a['components'][0]['value'] = $text;
     $a['components'][1]['text'] = $responseText;
-    echo json_encode($a);
+    echo json_encode($a, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
     
     
     $json = file_get_contents('php://input');

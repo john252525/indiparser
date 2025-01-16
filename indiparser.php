@@ -257,6 +257,8 @@ foreach($qq as $vv){
     $ins['dt_ins'] = $vv['dt_ins'];
     $ins['positionSide'] = $takestop;
     $db->query("INSERT INTO `z_0_signal` SET ?u ON DUPLICATE KEY UPDATE ?u", $ins, $ins);
+
+    $wdb->query("INSERT INTO `z_0_signal` SET ?u ON DUPLICATE KEY UPDATE ?u", $ins, $ins);
 }
 
 

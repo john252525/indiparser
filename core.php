@@ -8,8 +8,17 @@ $config = [
         'charset' => 'utf8mb4',
         'db' => _DB_DATABASE_,
     ],
+    'wdb' => [
+        'host' => _WDB_HOST_,
+        'user' => _WDB_LOGIN_,
+        'pass' => _WDB_PASSWORD_,
+        'charset' => 'utf8mb4',
+        'db' => _WDB_DATABASE_,
+    ],
 ];
 $db = new SafeMySQL($config['db']);
+
+$wdb = new SafeMySQL($config['wdb']);
 
 $nl = php_sapi_name() === 'cli'
     ? "\n"

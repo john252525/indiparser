@@ -235,6 +235,10 @@ foreach($qq as $vv){
     
     $takestop = '';
     $q = $db->getAll("SELECT * FROM `indiset_combo_by_users` WHERE `enable` = 1 AND `indiset_combo_id` = ?i", $vv['id']);
+
+    implode(',' array_column($q, 'side');
+    
+	
     $r = [];
     foreach($q as $v){
         $tmp = json_decode($v['takestop_ids'], 1);
@@ -255,14 +259,13 @@ foreach($qq as $vv){
     $ins['id'] = $vv['id'];
   //$ins['parent_id'] = 0;
     $ins['pair'] = '*';
-  //$ins['timeframe'] = '';
+    $ins['timeframe'] = 'undefined';
   //$ins['price'] = '';
     $ins['indicator'] = $indicator;
   //$ins['condition'] = '';
     $ins['enable'] = $vv['enable'];
     $ins['dt_ins'] = $vv['dt_ins'];
-    $ins['positionSide'] = $vv['side'];
-    $ins['takestop'] = $takestop;
+    $ins['positionSide'] = $takestop;
     $db->query("INSERT INTO `z_0_signal` SET ?u ON DUPLICATE KEY UPDATE ?u", $ins, $ins);
 
     $wdb->query("INSERT INTO `z_0_signal` SET ?u ON DUPLICATE KEY UPDATE ?u", $ins, $ins);

@@ -236,7 +236,7 @@ foreach($qq as $vv){
     $takestop = '';
     $q = $db->getAll("SELECT * FROM `indiset_combo_by_users` WHERE `enable` = 1 AND `indiset_combo_id` = ?i", $vv['id']);
 
-    implode(',' array_column($q, 'side'));
+    implode(',', array_column($q, 'side'));
     
 	
     $r = [];
